@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:qpd="http://www.mulesource.org/schema/mule/qpd/2.2"
+	xmlns:spring="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+       http://www.mulesource.org/schema/mule/core/2.2 http://www.mulesource.org/schema/mule/core/2.2/mule.xsd
+       http://www.mulesource.org/schema/mule/qpd/2.2 http://www.mulesource.org/schema/mule/qpd/2.2/mule-qpd.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<qpd:connector name="qpdConnector">
+		<spring:property name="initialFactory"
+			value="org.apache.qpid.jndi.PropertiesFileInitialContextFactory" />
+		<spring:property name="connFactory"
+			value="amqp://guest:guest@clientid/test?brokerlist='tcp://localhost:5672'" />
+		<spring:property name="topic" value="false" />
+	</qpd:connector>
+
+</mule>

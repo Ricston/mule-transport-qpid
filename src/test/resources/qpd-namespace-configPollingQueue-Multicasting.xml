@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:qpd="http://www.mulesource.org/schema/mule/qpd/2.2"
+	xmlns:vm="http://www.mulesource.org/schema/mule/vm/2.2" xmlns:spring="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+       http://www.mulesource.org/schema/mule/core/2.2 http://www.mulesource.org/schema/mule/core/2.2/mule.xsd
+       http://www.mulesource.org/schema/mule/vm/2.2 http://www.mulesource.org/schema/mule/vm/2.2/mule-vm.xsd
+       http://www.mulesource.org/schema/mule/qpd/2.2 http://www.mulesource.org/schema/mule/qpd/2.2/mule-qpd.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<qpd:connector name="qpdConnector">
+		<spring:property name="initialFactory"
+			value="org.apache.qpid.jndi.PropertiesFileInitialContextFactory" />
+		<spring:property name="connFactory"
+			value="amqp://guest:guest@clientid/test?brokerlist='tcp://localhost:5672'" />
+		<spring:property name="topic" value="false" />
+		<service-overrides messageReceiver="org.mule.transport.qpd.QpdPollingMessageReceiver" />
+	</qpd:connector>
+
+	<vm:connector name="TestConnector" queueEvents="true" />
+
+	<custom-transformer
+		class="org.mule.transport.qpd.transformers.ObjectMessageToString"
+		name="customTransformer" />
+
+	<model name="Model1">
+
+		<service name="Dispatch">
+			<inbound>
+				<vm:inbound-endpoint address="vm://inbound" />
+			</inbound>
+			<bridge-component />
+			<outbound>
+				<multicasting-router>
+					<qpd:outbound-endpoint
+						address="qpd://direct://amq.direct//queue1?autodelete='true'" />
+					<qpd:outbound-endpoint
+						address="qpd://direct://amq.direct//queue2?autodelete='true'" />
+				</multicasting-router>
+			</outbound>
+		</service>
+
+		<service name="Receive1">
+			<inbound>
+				<qpd:inbound-endpoint
+					address="qpd://direct://amq.direct//queue1?autodelete='true'" />
+			</inbound>
+			<outbound>
+				<pass-through-router>
+					<vm:outbound-endpoint address="vm://outbound1"
+						transformer-refs="customTransformer" />
+				</pass-through-router>
+			</outbound>
+		</service>
+
+		<service name="Receive2">
+			<inbound>
+				<qpd:inbound-endpoint
+					address="qpd://direct://amq.direct//queue2?autodelete='true'" />
+			</inbound>
+			<outbound>
+				<pass-through-router>
+					<vm:outbound-endpoint address="vm://outbound2"
+						transformer-refs="customTransformer" />
+				</pass-through-router>
+			</outbound>
+		</service>
+
+	</model>
+</mule>

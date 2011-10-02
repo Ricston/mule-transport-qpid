@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:qpd="http://www.mulesource.org/schema/mule/qpd/2.2"
+	xmlns:vm="http://www.mulesource.org/schema/mule/vm/2.2" xmlns:spring="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+       http://www.mulesource.org/schema/mule/core/2.2 http://www.mulesource.org/schema/mule/core/2.2/mule.xsd
+       http://www.mulesource.org/schema/mule/vm/2.2 http://www.mulesource.org/schema/mule/vm/2.2/mule-vm.xsd
+       http://www.mulesource.org/schema/mule/qpd/2.2 http://www.mulesource.org/schema/mule/qpd/2.2/mule-qpd.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<qpd:connector name="qpdConnector" topic="true"
+		connFactory="amqp://guest:guest@clientid/test?brokerlist='tcp://localhost:5672'"
+		initialFactory="org.apache.qpid.jndi.PropertiesFileInitialContextFactory" />
+
+	<vm:connector name="TestConnector" queueEvents="true" />
+
+	<custom-transformer
+		class="org.mule.transport.qpd.transformers.ObjectMessageToString"
+		name="customTransformer" />
+
+	<model name="Model1">
+
+		<service name="Dispatch">
+			<inbound>
+				<vm:inbound-endpoint address="vm://inbound" />
+			</inbound>
+			<outbound>
+				<pass-through-router>
+					<qpd:outbound-endpoint
+						address="qpd://topic://amq.topic//queue1?routingkey='topic.qpd'&amp;autodelete='true'" />
+				</pass-through-router>
+			</outbound>
+		</service>
+
+		<service name="Receive">
+			<inbound>
+				<qpd:inbound-endpoint
+					address="qpd://topic://amq.topic//queue1?routingkey='topic.qpd'&amp;autodelete='true'" />
+			</inbound>
+			<outbound>
+				<pass-through-router>
+					<vm:outbound-endpoint address="vm://outbound"
+						transformer-refs="customTransformer" />
+				</pass-through-router>
+			</outbound>
+		</service>
+
+	</model>
+
+</mule>

@@ -1,0 +1,4 @@
+1. Type 'mvn package' in the project root directory 
+
+2. In the 'MULE_HOME/lib/user' directory, place 'mule-transport-qpd-[version].jar' 
+   found in the 'target' folder

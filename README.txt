@@ -1,0 +1,1 @@
+See http://www.mulesoft.org/qpid for more info on the Qpid Mule transport.
