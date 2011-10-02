@@ -1,1 +1,1 @@
-See http://www.mulesoft.org/qpid for more info on the Qpid Mule transport.
+See http://www.mulesoft.org/qpid for info on the Qpid Mule transport.
